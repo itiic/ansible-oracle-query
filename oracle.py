@@ -28,11 +28,11 @@ import os
 def main():
     module = AnsibleModule(
         argument_spec = dict(
-            oracle_home=dict(required=True, default=None),
-            tnsname=dict(required=True, default=None),
-            user=dict(required=True, default='system'),
-            pass=dict(required=True, default='pass'),
-            query=dict(required=True, default='select * from dual')
+            oracle_home=dict(required=True, default=None, type='str'),
+            tnsname=dict(required=True, default=None, type='str'),
+            user=dict(required=True, default='system', type='str'),
+            pass=dict(required=True, default='pass', type='str'),
+            query=dict(required=True, default='select * from dual', type='str')
         ),
         supports_check_mode = True
     )
