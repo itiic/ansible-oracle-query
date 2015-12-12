@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# (c) 2015, Robert Dolega <itiit.robert.dolega@gmail.com>
+# (c) 2015, Robert Dolega
 #
 # This ansible module to execute oracle queries
 
@@ -23,20 +23,55 @@ EXAMPLES = '''
 '''
 
 import os
+import json
+from subprocess import Popen, PIPE
+
+
+def runSqlQuery(sqlCommand, connectString, oracleHome):
+   session = Popen(oracleHome + '/bin/sqlplus', '-S', connectString], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+   session.stdin.write(sqlCommand)
+   return session.communicate()
 
 
 def main():
+    global module
     module = AnsibleModule(
         argument_spec = dict(
-            oracle_home=dict(required=True, default=None, type='str'),
-            tnsname=dict(required=True, default=None, type='str'),
-            user=dict(required=True, default='system', type='str'),
-            pass=dict(required=True, default='pass', type='str'),
-            query=dict(required=True, default='select * from dual', type='str')
+            oracleHome=dict(required=True, default=None, type='str'),
+            connectString=dict(required=True, default=None, type='str'),
+            scriptPath=dict(required=True, default=None, type='str')
         ),
         supports_check_mode = True
     )
-    # TODO almost everything
+
+    # global vars
+    oracleHome = module.params['oracleHome']
+
+    # user/pass@SID
+    connectString = module.params['connectString']
+
+    # path to script
+    scriptPath = module.params['scriptPath']
+
+    # set ORACLE_HOME environment variable
+    os.environ['ORACLE_HOME'] = oracleHome
+    # = @ +  path
+    sqlCommand = '@'+scriptPath
+
+    # execution
+    queryResult, errorMessage = runSqlQuery(sqlCommand, connectString, oracleHome)
+
+    # TODO 1. Output to json
+    # TODO 2. Error handler
+    # TODO 3. Test it :)
+
+    module.exit_json(
+        changed=changed,
+        key=key,
+        type=argument_type,
+        value=value,
+        old_value=old_value
+    )
 
 from ansible.module_utils.basic import *
 
